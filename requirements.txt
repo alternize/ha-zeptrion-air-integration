@@ -1,3 +1,5 @@
-colorlog==6.8.2
+aiohttp
+async_timeout
 homeassistant>=2025.5.0
-pip>=21.3.1
+voluptuous
+xmltodict
