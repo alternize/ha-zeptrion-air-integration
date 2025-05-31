@@ -25,6 +25,7 @@ from .api import (
 )
 from .coordinator import ZeptrionAirDataUpdateCoordinator
 from .data import ZeptrionAirData
+from .websocket_listener import ZeptrionAirWebsocketListener # ADDED WS LISTENER IMPORT
 
 from .frontend import async_setup_frontend
 
@@ -135,6 +136,22 @@ async def async_setup_entry(
         **hub_device_info 
     )
 
+    current_runtime_data = entry.runtime_data
+    if isinstance(current_runtime_data, ZeptrionAirData):
+        websocket_listener = ZeptrionAirWebsocketListener(hostname=hostname, hass_instance=hass)
+        await websocket_listener.start()
+
+        current_runtime_data.websocket_listener = websocket_listener
+        LOGGER.info(f"[{hostname}] WebSocket listener started and attached to runtime_data.")
+    else:
+        if 'websocket_listener' in locals() and websocket_listener:
+            LOGGER.debug(f"[{hostname}] Attempting to stop websocket listener due to runtime_data issue.")
+            await websocket_listener.stop()
+        # Depending on criticality, could return False or raise an error.
+        # For now, we log the error and proceed without WS, as core functionality might still work.
+        # Consider returning False if WS is essential:
+        # return False
+
     identified_channels: list[dict[str, Any]] = []
     
     chdes_root: dict[str, Any] = channel_des_data.get('chdes', {}) 
@@ -232,7 +249,7 @@ async def async_setup_entry(
         "identified_channels": identified_channels, 
         "entry_title": hub_name, 
         "hub_serial": serial_number, 
-        "coordinator": coordinator # coordinator is already initialized
+        "coordinator": coordinator
     }
     hass.data.setdefault(DOMAIN, {})[entry.entry_id] = platform_setup_data
     
@@ -258,11 +275,22 @@ async def async_unload_entry(
     entry: ConfigEntry,
 ) -> bool:
     """Handle removal of an entry."""
+    # Stop the websocket listener if it exists
+    if entry.runtime_data and isinstance(entry.runtime_data, ZeptrionAirData) and entry.runtime_data.websocket_listener:
+        LOGGER.debug(f"[{entry.data.get(CONF_HOSTNAME, 'Unknown Host')}] Unloading: Stopping websocket listener.")
+        await entry.runtime_data.websocket_listener.stop()
+        entry.runtime_data.websocket_listener = None
+
     unload_ok: bool = await hass.config_entries.async_unload_platforms(entry, ZEPTRION_PLATFORMS)
     if unload_ok:
         if DOMAIN in hass.data and entry.entry_id in hass.data[DOMAIN]:
             hass.data[DOMAIN].pop(entry.entry_id)
-        if hasattr(entry, 'runtime_data') and isinstance(entry.runtime_data, ZeptrionAirData):
+        # Ensure runtime_data is cleared, especially if it was ZeptrionAirData
+        if hasattr(entry, 'runtime_data') and entry.runtime_data is not None:
+            if isinstance(entry.runtime_data, ZeptrionAirData):
+                LOGGER.debug(f"[{entry.data.get(CONF_HOSTNAME, 'Unknown Host')}] Clearing ZeptrionAirData from entry.runtime_data.")
+            else:
+                LOGGER.debug(f"[{entry.data.get(CONF_HOSTNAME, 'Unknown Host')}] Clearing non-ZeptrionAirData from entry.runtime_data.")
             entry.runtime_data = None 
     return unload_ok
 

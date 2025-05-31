@@ -4,17 +4,14 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
+from homeassistant.config_entries import ConfigEntry
 
 if TYPE_CHECKING:
-    from homeassistant.config_entries import ConfigEntry
     from homeassistant.loader import Integration
 
     from .api import ZeptrionAirApiClient
     from .coordinator import ZeptrionAirDataUpdateCoordinator
-
-
-type ZeptrionAirConfigEntry = ConfigEntry[ZeptrionAirData]
-
+    from .websocket_listener import ZeptrionAirWebsocketListener
 
 @dataclass
 class ZeptrionAirData:
@@ -23,3 +20,10 @@ class ZeptrionAirData:
     client: ZeptrionAirApiClient
     coordinator: ZeptrionAirDataUpdateCoordinator
     integration: Integration
+    websocket_listener: "ZeptrionAirWebsocketListener | None" = None
+
+@dataclass
+class ZeptrionAirConfigEntry(ConfigEntry):
+    """Typed ConfigEntry for Zeptrion Air."""
+    runtime_data: ZeptrionAirData | None = None
+

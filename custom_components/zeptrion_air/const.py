@@ -9,7 +9,7 @@ from homeassistant.const import Platform
 LOGGER: Logger = getLogger(__package__)
 
 DOMAIN: str = "zeptrion_air"
-ATTRIBUTION: str = "Data provided by http://jsonplaceholder.typicode.com/"
+ATTRIBUTION: str = ""
 
 CONF_NAME: str ="name"
 CONF_IP_ADDRESS: str = "ip_address"
@@ -35,3 +35,5 @@ MAX_STEP_DURATION_MS: int = 32000
 # Platforms
 PLATFORMS: list[Platform] = [Platform.COVER, Platform.BUTTON, Platform.SENSOR]
 
+# Events
+ZEPTRION_AIR_WEBSOCKET_MESSAGE: str = "zeptrion_air_websocket_message"
