@@ -44,8 +44,7 @@ class ZeptrionAirConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         config_entry: config_entries.ConfigEntry,
     ) -> config_entries.OptionsFlow: 
         """Get the options flow for this handler."""
-        return ZeptrionAirOptionsFlowHandler(config_entry)
-
+        return ZeptrionAirOptionsFlowHandler()
     discovery_info: dict[str, Any]
 
     def __init__(self) -> None:
@@ -233,24 +232,23 @@ class ZeptrionAirConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 class ZeptrionAirOptionsFlowHandler(config_entries.OptionsFlow):
     """Handle Zeptrion Air options."""
 
-    def __init__(self, config_entry: config_entries.ConfigEntry) -> None:
+    def __init__(self) -> None:
         """Initialize options flow."""
-        self.config_entry: config_entries.ConfigEntry = config_entry
-        self.options: dict[str, Any] = dict(config_entry.options)
 
     async def async_step_init(
         self, user_input: dict[str, Any] | None = None
-    ) -> data_entry_flow.FlowResult: 
+    ) -> data_entry_flow.FlowResult:
         """Manage the options."""
-        errors: dict[str, str] = {}
 
         if user_input is not None:
-            self.options.update(user_input)
-            return self.async_create_entry(title="", data=self.options)
+            return self.async_create_entry(title="", data=user_input)
 
         current_duration: int = self.config_entry.options.get(
             CONF_STEP_DURATION_MS,
-            self.config_entry.data.get(CONF_STEP_DURATION_MS, DEFAULT_STEP_DURATION_MS)
+            self.config_entry.data.get(
+                CONF_STEP_DURATION_MS,
+                DEFAULT_STEP_DURATION_MS,
+            ),
         )
 
         options_schema: vol.Schema = vol.Schema(
@@ -258,12 +256,17 @@ class ZeptrionAirOptionsFlowHandler(config_entries.OptionsFlow):
                 vol.Optional(
                     CONF_STEP_DURATION_MS,
                     default=current_duration,
-                ): vol.All(vol.Coerce(int), vol.Range(min=MIN_STEP_DURATION_MS, max=MAX_STEP_DURATION_MS)),
+                ): vol.All(
+                    vol.Coerce(int),
+                    vol.Range(
+                        min=MIN_STEP_DURATION_MS,
+                        max=MAX_STEP_DURATION_MS,
+                    ),
+                ),
             }
         )
 
         return self.async_show_form(
             step_id="init",
             data_schema=options_schema,
-            errors=errors,
         )

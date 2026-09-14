@@ -12,15 +12,15 @@ This is a custom integration for Home Assistant that allows you to control [Zept
     *   Full support for Zeptrion channels controlling blinds/shutters (Category 5) and awnings/markise (Category 6).
     *   Standard Home Assistant cover controls: Open, Close, Stop.
     *   Custom services for fine-grained control:
-        *   `zeptrion_air.blind_up_step`
-        *   `zeptrion_air.blind_down_step`
+        *   `zeptrion_air.blind_step_up`
+        *   `zeptrion_air.blind_step_down`
         *   `zeptrion_air.blind_recall_s1`
         *   `zeptrion_air.blind_recall_s2`
         *   `zeptrion_air.blind_recall_s3`
         *   `zeptrion_air.blind_recall_s4`
 *   **Button Entities:** Provides button entities in Home Assistant for each of the custom cover services (Step Up/Down, S1-S4 scenes), making them easily accessible from the UI.
 *   **Sensor Entities:** Exposes channel name, group, and Zeptrion icon ID as sensor entities (disabled by default). These can be enabled by the user if desired.
-*   **Configurable Step Duration:** The duration (in milliseconds) for the "up step" and "down step" services can be configured via the integration's options flow.
+*   **Configurable Step Duration:** The duration (in milliseconds) for the "up step" and "down step" services can be configured via the integration's options flow. The default duration is 250 ms. The `blind_step_up` and `blind_step_down` services also accept an optional `duration` parameter.
 
 ## Current Limitations
 

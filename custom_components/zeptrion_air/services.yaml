@@ -29,3 +29,41 @@ blind_recall_s4:
     entity:
       integration: zeptrion_air
       domain: cover
+
+blind_step_up:
+  name: Blind Step Up
+  description: Moves the blind up for the specified duration.
+  target:
+    entity:
+      integration: zeptrion_air
+      domain: cover
+  fields:
+    duration:
+      name: Duration
+      description: Duration of the movement in milliseconds.
+      required: false
+      selector:
+        number:
+          min: 100
+          max: 32000
+          step: 100
+          unit_of_measurement: ms
+
+blind_step_down:
+  name: Blind Step Down
+  description: Moves the blind down for the specified duration.
+  target:
+    entity:
+      integration: zeptrion_air
+      domain: cover
+  fields:
+    duration:
+      name: Duration
+      description: Duration of the movement in milliseconds.
+      required: false
+      selector:
+        number:
+          min: 100
+          max: 32000
+          step: 100
+          unit_of_measurement: ms
