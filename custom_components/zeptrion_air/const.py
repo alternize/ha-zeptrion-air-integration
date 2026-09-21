@@ -32,7 +32,7 @@ MIN_STEP_DURATION_MS: int = 100
 MAX_STEP_DURATION_MS: int = 32000
 
 # Platforms
-PLATFORMS: list[Platform] = [Platform.COVER, Platform.BUTTON, Platform.SENSOR]
+PLATFORMS: list[Platform] = [Platform.COVER, Platform.BUTTON, Platform.SENSOR, Platform.LIGHT]
 
 # Events
 ZEPTRION_AIR_WEBSOCKET_MESSAGE: str = "zeptrion_air_websocket_message"

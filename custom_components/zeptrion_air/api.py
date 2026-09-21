@@ -439,23 +439,47 @@ class ZeptrionAirApiClient:
             data={"cmd": "off"},
         )
 
-    async def async_channel_set_brightness(self, channel: int, brightness_0_255: int) -> dict[str, Any]:
-        """Send 'dim' command with brightness value to a channel."""
-        # Convert HA brightness (0-255) to API brightness (0-100)
-        api_brightness = int(round(brightness_0_255 * 100 / 255))
-
-        # Ensure api_brightness is within the 0-100 range after conversion,
-        # though standard rounding should keep it within bounds if input is 0-255.
-        api_brightness = max(0, min(100, api_brightness))
-
-        data_payload = {"cmd": "dim", "val": api_brightness}
-        
+    async def async_channel_dim_down_for(self, channel: int, time_ms: int) -> dict[str, Any]:
+        """Dim light down for a specified time in milliseconds."""
+        time_ms = max(100, min(32000, int(time_ms)))
         _LOGGER.debug(
-            f"Sending 'dim' command to channel {channel} on {self._hostname} "
-            f"with HA brightness {brightness_0_255} (API value: {api_brightness})"
+            f"Sending 'dim_down_({time_ms})' command to channel {channel} on {self._hostname}"
         )
-        
         return await self._api_post_url_encoded_wrapper(
             path=f"/zrap/chctrl/ch{channel}",
-            data=data_payload,
+            data={"cmd": f"dim_down_{time_ms}"},
         )
+
+    async def async_channel_dim_up_for(self, channel: int, time_ms: int) -> dict[str, Any]:
+        """Dim light up for a specified time in milliseconds."""
+        time_ms = max(100, min(32000, int(time_ms)))
+        _LOGGER.debug(
+            f"Sending 'dim_up_({time_ms})' command to channel {channel} on {self._hostname}"
+        )
+        return await self._api_post_url_encoded_wrapper(
+            path=f"/zrap/chctrl/ch{channel}",
+            data={"cmd": f"dim_up_{time_ms}"},
+        )
+
+    async def async_channel_set_brightness(self, channel: int, brightness_0_255: int) -> dict[str, Any]:
+        """Set brightness using a calibrated press-and-hold strategy."""
+        brightness_0_255 = max(0, min(255, int(brightness_0_255)))
+
+        if brightness_0_255 == 0:
+            return await self.async_channel_off(channel)
+
+        if brightness_0_255 == 255:
+            return await self.async_channel_on(channel)
+
+        full_travel_ms = 3400
+        dim_down_ms = round((255 - brightness_0_255) / 255 * full_travel_ms)
+        dim_down_ms = max(100, min(full_travel_ms, dim_down_ms))
+
+        _LOGGER.debug(
+            f"Setting brightness on channel {channel}: "
+            f"HA brightness={brightness_0_255}, dim_down_ms={dim_down_ms}"
+        )
+
+        await self.async_channel_on(channel)
+        await asyncio.sleep(0.25)
+        return await self.async_channel_dim_down_for(channel, dim_down_ms)
