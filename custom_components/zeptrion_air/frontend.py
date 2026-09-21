@@ -81,7 +81,7 @@ async def async_setup_frontend(hass, entry):
                     if not existing and hasattr(resources, 'async_create_item'):
                         await resources.async_create_item({
                             "url": resource_url,
-                            "type": "module"
+                            "res_type": "module"
                         })
                         _LOGGER.info("Added Zeptrion Air card to Lovelace resources")
         except Exception as e:
