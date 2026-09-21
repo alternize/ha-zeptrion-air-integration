@@ -18,13 +18,16 @@ This is a custom integration for Home Assistant that allows you to control [Zept
         *   `zeptrion_air.blind_recall_s2`
         *   `zeptrion_air.blind_recall_s3`
         *   `zeptrion_air.blind_recall_s4`
+*   **Light Control (Switches/Dimmers):**
+    *   Channels of category 1 (on/off) and category 3 (dimmer) are exposed as Home Assistant `Light` entities.
+    *   Dimmer brightness is set by a calibrated press-and-hold sequence (full travel assumed to take 3.4 s), because the Zeptrion Air API has no absolute brightness command.
 *   **Button Entities:** Provides button entities in Home Assistant for each of the custom cover services (Step Up/Down, S1-S4 scenes), making them easily accessible from the UI.
 *   **Sensor Entities:** Exposes channel name, group, and Zeptrion icon ID as sensor entities (disabled by default). These can be enabled by the user if desired.
 *   **Configurable Step Duration:** The duration (in milliseconds) for the "up step" and "down step" services can be configured via the integration's options flow.
 
 ## Current Limitations
 
-*   **Primary Focus on Covers:** While the integration identifies channels for lights (Category 1 - On/Off, Category 3 - Dimmer), Home Assistant `Light` entities for these are not yet implemented. Only cover devices are fully supported with corresponding HA entities.
+*   **Dimmer Brightness is Optimistic:** The Zeptrion Air API does not report the current brightness of a dimmer. Home Assistant keeps the last requested brightness and only reads back the on/off state. Brightness set via the calibrated dim sequence is approximate.
 *   **No Position Feedback for Covers:** The Zeptrion Air API does not provide real-time position feedback for blinds/covers. Therefore, the Home Assistant cover entities will not display the current position (e.g., 50% open). Status updates are optimistic based on commands sent.
 *   **Sensors are Static:** The sensor entities for channel name, group, and icon ID are populated once during setup and do not update dynamically if changed on the Zeptrion device itself (though these are typically static).
 
